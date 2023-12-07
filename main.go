@@ -39,6 +39,7 @@ func handleConnection(conn net.Conn) {
 		recieved := scanner.Text()
 		fmt.Println("Recieved: ", recieved)
 		//Write into the client
+		conn.Write([]byte("\n"))
 		conn.Write([]byte("Hello Client from: \n"))
 	}
 
