@@ -40,7 +40,8 @@ func handleConnection(conn net.Conn) {
 		fmt.Println("Recieved: ", recieved)
 		//Write into the client
 		conn.Write([]byte("\n"))
-		conn.Write([]byte("Hello Client from: \n"))
+		returnText := "Hello client from : " + conn.RemoteAddr().Network() + "\n"
+		conn.Write([]byte(returnText))
 	}
 
 	if err := scanner.Err(); err != nil {
