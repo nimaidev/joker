@@ -42,6 +42,7 @@ func handleConnection(conn net.Conn) {
 		conn.Write([]byte("\n"))
 		returnText := "Hello client from : " + conn.RemoteAddr().Network() + "\n"
 		conn.Write([]byte(returnText))
+		//TODO:  See how redis work to get commands from clients
 	}
 
 	if err := scanner.Err(); err != nil {
