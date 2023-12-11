@@ -35,7 +35,7 @@ func handleConnection(conn net.Conn) {
 	scanner := bufio.NewScanner(conn)
 	for scanner.Scan() {
 		recv := scanner.Text()
-		returnStr := "SERVER: " + recv + "\r\n"
+		returnStr := "SERVER: " + recv + utils.EOL
 		fmt.Println("CLIENT: ", conn.RemoteAddr(), " : ", recv)
 		conn.Write([]byte(returnStr))
 	}
