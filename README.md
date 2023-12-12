@@ -6,9 +6,10 @@ JokerDB🃏 is a Redis clone implemented in Golang. This project aims to provide
 
 - **Key-Value Store:** A basic key-value store inspired by Redis.
 - **In-Memory Database:** Data is stored in-memory for simplicity.
-- **Support for Data Types:** String, List, Set, etc. (as per your implementation).
+- **Support for Data Types:** String
+<!-- , List, Set, etc. -->
 - **Command-Line Interface (CLI):** Interact with JokerDB🃏 through a command-line interface.
-- **Concurrency:** Implement concurrent operations for scalability.
+<!-- - **Concurrency:** Implement concurrent operations for scalability. -->
 
 ## Getting Started
 
