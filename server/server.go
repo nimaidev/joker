@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net"
 
+	"github.com/0x4E43/joker/constatnts"
 	"github.com/0x4E43/joker/utils"
 )
 
@@ -35,7 +36,7 @@ func handleConnection(conn net.Conn) {
 	scanner := bufio.NewScanner(conn)
 	for scanner.Scan() {
 		recv := scanner.Text()
-		returnStr := "SERVER: " + recv + utils.EOL
+		returnStr := "SERVER: " + recv + constatnts.EOL
 		fmt.Println("CLIENT: ", conn.RemoteAddr(), " : ", recv)
 		conn.Write([]byte(returnStr))
 	}
@@ -43,5 +44,4 @@ func handleConnection(conn net.Conn) {
 	if err := scanner.Err(); err != nil {
 		fmt.Print("Something went wrong with Scanner")
 	}
-
 }
