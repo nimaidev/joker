@@ -26,7 +26,7 @@ func main() {
 	// 	handleError(err)
 	// 	go ha
 
-	servOption := server.SetServerOption("6382")
+	servOption := server.SetServerOption("6379")
 	server.CreateServer(servOption)
 }
 
