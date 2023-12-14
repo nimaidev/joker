@@ -42,6 +42,15 @@ func handleConnection(conn net.Conn) {
 	}
 
 	if err := scanner.Err(); err != nil {
-		fmt.Print("Something went wrong with Scanner")
+		if opErr, ok := err.(*net.OpError); ok {
+			if opErr.Err.Error() == "use of closed network connection" {
+				fmt.Println("Connection closed by client")
+			} else {
+				fmt.Println("Network error:", opErr.Err)
+			}
+		} else {
+			fmt.Println("Scanner error:", err)
+		}
 	}
+
 }
