@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net"
 
-	"github.com/0x4E43/joker/constants"
 	"github.com/0x4E43/joker/utils"
 )
 
@@ -36,8 +35,11 @@ func handleConnection(conn net.Conn) {
 	scanner := bufio.NewScanner(conn)
 	for scanner.Scan() {
 		recv := scanner.Text()
-		returnStr := constants.String + "SERVER: " + recv + constants.EOL
-		fmt.Println("CLIENT: ", conn.RemoteAddr(), " : ", recv)
+		returnStr := recv + "\r\n"
+
+		fmt.Println("CLIENT:", conn.RemoteAddr(), ":", recv)
+		fmt.Println("SERVER:", returnStr)
+
 		conn.Write([]byte(returnStr))
 	}
 
