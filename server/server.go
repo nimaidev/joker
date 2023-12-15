@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"net"
+	"strings"
 
 	"github.com/0x4E43/joker/utils"
 )
@@ -31,16 +32,30 @@ func CreateServer(servOption *ServerOption) {
 
 func handleConnection(conn net.Conn) {
 	defer conn.Close()
-
+	var commandBuffer strings.Builder
 	scanner := bufio.NewScanner(conn)
 	for scanner.Scan() {
 		recv := scanner.Text()
-		returnStr := recv + "\r\n"
+		// returnStr := recv + "\r\n"
+		commandBuffer.WriteString(recv + " ")
 
-		fmt.Println("CLIENT:", conn.RemoteAddr(), ":", recv)
-		fmt.Println("SERVER:", returnStr)
+		// fmt.Println("CLIENT:", conn.RemoteAddr(), ":", recv)
+		// fmt.Println("SERVER:", returnStr)
+		if len(recv) > 1 {
+			parseCommand(recv)
+		}
 
-		conn.Write([]byte(returnStr))
+		if recv == "" {
+			// Process the entire command
+			command := strings.TrimSpace(commandBuffer.String())
+			if len(command) > 0 {
+				parseCommand(command)
+			}
+
+			// Clear the buffer for the next command
+			commandBuffer.Reset()
+		}
+		conn.Write([]byte(recv))
 	}
 
 	if err := scanner.Err(); err != nil {
@@ -55,4 +70,21 @@ func handleConnection(conn net.Conn) {
 		}
 	}
 
+}
+
+func parseCommand(cmd string) {
+	parts := strings.Fields(cmd)
+	cmdLen := len(parts)
+	if cmdLen < 1 {
+		fmt.Println("Invalid Command")
+		return
+	}
+
+	fmt.Println(cmdLen, "arguments:")
+	for i, arg := range parts {
+		fmt.Printf("%d) \"%s\"\n", i+1, arg)
+	}
+	wholeCommand := strings.Join(parts, " ")
+	fmt.Println("Entire Command as a Single Argument:")
+	fmt.Printf("1) \"%s\"\n", wholeCommand)
 }
