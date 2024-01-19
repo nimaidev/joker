@@ -54,10 +54,9 @@ func handleConnectionV0(conn net.Conn) {
 		}
 		log.Println("Read", n, "bytes from connection")
 
-		log.Println(string(buf))
+		// log.Println(string(buf))
 
-		parser.ParseString(string(buf))
-		conn.Write([]byte("-OK\r\n"))
+		conn.Write(parser.ProcessCLICommand(string(buf)))
 	}
 }
 
