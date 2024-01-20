@@ -32,14 +32,22 @@ func processCommand(cmdList []string) []byte {
 		var cmdLen int
 		if i%2 == 0 {
 			cmdLen, _ = strconv.Atoi(cmdList[i][1:])
+			if cmdLen != 0 {
+				//check for the next value
+				if cmdList[i+1] == constants.CLI_CMD_PING {
+					return respondPingCommand("hjell")
+				}
+			}
 		}
 		log.Println("Command length: ", cmdLen)
 	}
-	return respondPingCommand()
+	return respondPingCommand("dd")
 }
 
-func respondPingCommand() []byte {
-	return []byte(constants.SIMPLE_STRING + "PONG" + constants.EOL)
+func respondPingCommand(msg string) []byte {
+	returnStr := constants.SIMPLE_STRING + "PONG" + constants.EOL + constants.SIZE + strconv.FormatInt(int64(len(msg)), 10) + constants.EOL + msg + constants.EOL
+	log.Println(returnStr)
+	return []byte(returnStr)
 }
 
 func respondError(msg string) []byte {

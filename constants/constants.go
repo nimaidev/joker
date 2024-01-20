@@ -15,4 +15,7 @@ const (
 	NULL  = "_"
 	BULK  = "$"
 	SIZE  = "$"
+
+	//commands
+	CLI_CMD_PING = "PING"
 )
