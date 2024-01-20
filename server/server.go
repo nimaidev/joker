@@ -3,9 +3,12 @@ package server
 import (
 	"bufio"
 	"fmt"
+	"io"
+	"log"
 	"net"
 	"strings"
 
+	"github.com/0x4E43/joker/parser"
 	"github.com/0x4E43/joker/utils"
 )
 
@@ -24,9 +27,37 @@ func CreateServer(servOption *ServerOption) {
 	utils.HandleError(err)
 	fmt.Println("Joker laighing at :", lstnr.Addr().String())
 	for {
+
 		conn, err := lstnr.Accept()
 		utils.HandleError(err)
-		go handleConnection(conn)
+		// scanner := bufio.NewScanner(conn)
+
+		// rcv := scanner.Text()
+		// conn.Write([]byte(rcv))
+		// for scanner.Scan() {
+		// 	rcv := scanner.Text()
+		// 	conn.Write([]byte(rcv))
+		// }hh
+		go handleConnectionV0(conn)
+	}
+}
+
+func handleConnectionV0(conn net.Conn) {
+	buf := make([]byte, 1024)
+	for {
+		n, err := conn.Read(buf)
+		if err != nil {
+			if err != io.EOF {
+				log.Println("Error reading from connection:", err)
+			}
+			break
+		}
+		log.Println("Read", n, "bytes from connection")
+
+		log.Println(string(buf))
+
+		parser.ParseString(string(buf))
+		conn.Write([]byte("-OK\r\n"))
 	}
 }
 
@@ -39,7 +70,7 @@ func handleConnection(conn net.Conn) {
 		// returnStr := recv + "\r\n"
 		commandBuffer.WriteString(recv + " ")
 
-		// fmt.Println("CLIENT:", conn.RemoteAddr(), ":", recv)
+		log.Println("CLIENT:", conn.RemoteAddr(), ":", recv)
 		// fmt.Println("SERVER:", returnStr)
 		if len(recv) > 1 {
 			parseCommand(recv)
