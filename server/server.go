@@ -43,9 +43,20 @@ func handleConnectionV0(conn net.Conn) {
 
 			break
 		}
+		if n == 0 {
+			//no data to process
+			continue
+		}
 		log.Println("Read", n, "bytes from connection: ", conn.RemoteAddr())
-		returnStr := "OK, " + string(buf)
-		conn.Write([]byte(returnStr))
-		buf = nil
+		// Process the received data
+		processData(buf[:n], conn)
+
 	}
+}
+
+func processData(data []byte, conn net.Conn) {
+	// Process the received data here
+	returnStr := "OK, " + string(data)
+	fmt.Print("Size: ", len([]byte(returnStr)))
+	conn.Write([]byte(returnStr))
 }
