@@ -28,13 +28,6 @@ func CreateServer(servOption *ServerOption) {
 		conn, err := lstnr.Accept()
 		log.Println("Client: ", conn.RemoteAddr())
 		utils.HandleError(err)
-		// scanner := bufio.NewScanner(conn)
-		// rcv := scanner.Text()
-		// conn.Write([]byte(rcv))
-		// for scanner.Scan() {
-		// 	rcv := scanner.Text()
-		// 	conn.Write([]byte(rcv))
-		// }hh
 		go handleConnectionV0(conn)
 	}
 }
@@ -51,9 +44,6 @@ func handleConnectionV0(conn net.Conn) {
 			break
 		}
 		log.Println("Read", n, "bytes from connection: ", conn.RemoteAddr())
-		// log.Println(string(buf))
-		// log.Println("BUFFER: ", buf)
-		// conn.Write(parser.ProcessCLICommand(string(buf)))
 		returnStr := "OK, " + string(buf)
 		conn.Write([]byte(returnStr))
 		buf = nil
