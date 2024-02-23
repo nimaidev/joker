@@ -8,7 +8,6 @@ import (
 	"net"
 	"strings"
 
-	"github.com/0x4E43/joker/parser"
 	"github.com/0x4E43/joker/utils"
 )
 
@@ -26,12 +25,12 @@ func CreateServer(servOption *ServerOption) {
 	lstnr, err := net.Listen("tcp", ":"+servOption.port)
 	utils.HandleError(err)
 	fmt.Println("Joker laighing at :", lstnr.Addr().String())
+	defer lstnr.Close()
 	for {
-
 		conn, err := lstnr.Accept()
+		log.Println("Client: ", conn.RemoteAddr())
 		utils.HandleError(err)
 		// scanner := bufio.NewScanner(conn)
-
 		// rcv := scanner.Text()
 		// conn.Write([]byte(rcv))
 		// for scanner.Scan() {
@@ -43,20 +42,23 @@ func CreateServer(servOption *ServerOption) {
 }
 
 func handleConnectionV0(conn net.Conn) {
-	buf := make([]byte, 1024)
 	for {
+		buf := make([]byte, 1024)
 		n, err := conn.Read(buf)
 		if err != nil {
-			if err != io.EOF {
-				log.Println("Error reading from connection:", err)
+			if err == io.EOF {
+				log.Println("Connection closed by client, ", conn.RemoteAddr())
 			}
+
 			break
 		}
-		log.Println("Read", n, "bytes from connection")
-
+		log.Println("Read", n, "bytes from connection: ", conn.RemoteAddr())
 		// log.Println(string(buf))
-
-		conn.Write(parser.ProcessCLICommand(string(buf)))
+		// log.Println("BUFFER: ", buf)
+		// conn.Write(parser.ProcessCLICommand(string(buf)))
+		return
+		conn.Write(buf)
+		buf = nil
 	}
 }
 
