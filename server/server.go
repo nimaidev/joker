@@ -56,7 +56,12 @@ func handleConnectionV0(conn net.Conn) {
 
 func processData(data []byte, conn net.Conn) {
 	// Process the received data here
-	returnStr := "OK, " + string(data)
-	fmt.Print("Size: ", len([]byte(returnStr)))
-	conn.Write([]byte(returnStr))
+	returnStr := "OK, " + string(data[4:]) //first four bute are tag and value
+	log.Println("Size: ", len([]byte(returnStr)))
+	// conn.Write([]byte(returnStr))
+	log.Println("Return String:", returnStr)
+	_, err := conn.Write([]byte(returnStr))
+	if err != nil {
+		log.Println("Error writing to connection:", err)
+	}
 }
