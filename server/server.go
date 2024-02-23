@@ -6,9 +6,17 @@ import (
 	"io"
 	"log"
 	"net"
+	"strings"
 
 	"github.com/0x4E43/joker/utils"
 )
+
+var datMap map[string]any
+
+func init() {
+	log.Println("INIT")
+	datMap = make(map[string]any, 0)
+}
 
 type ServerOption struct {
 	port string
@@ -66,6 +74,7 @@ func processData(data []byte, conn net.Conn) {
 	log.Println("Size: ", len([]byte(tlv.Value)))
 	// conn.Write([]byte(returnStr))
 	log.Println("Return String:", returnStr)
+	parseCmd(int16(tlv.Tag), tlv.Value)
 	_, err = conn.Write([]byte(returnStr))
 	if err != nil {
 		log.Println("Error writing to connection:", err)
@@ -90,9 +99,10 @@ func Decode(data []byte) (*TLV, error) {
 		return nil, fmt.Errorf("insufficient data for TLV value decoding")
 	}
 
-	nData := data[4:length]
+	fmt.Println("DATA: ", data)
+	nData := data[4:]
 
-	fmt.Println("DATA: ", string(nData), " CMD: ", cmd)
+	fmt.Println("DATA: ", nData, " CMD: ", cmd, " LENGTH: ", length)
 
 	tlv := TLV{
 		Tag:    cmd,
@@ -110,4 +120,47 @@ func (t *TLV) Encode() []byte {
 	copy(buf[4:], t.Value)
 	// fmt.Println(buf)
 	return buf
+}
+
+func parseCmd(tag int16, data []byte) {
+	log.Println("DATA MAP: ", datMap)
+	switch tag {
+	case 1:
+		log.Println("PUT method called")
+		proceedWithPut(data)
+	case 2:
+		log.Println("GET method called")
+		proceedWithGet(data)
+	default:
+		log.Panicln("NOT valid method")
+	}
+}
+
+func proceedWithPut(data []byte) {
+	log.Println(string(data))
+	parts := strings.Split(string(data), ">")
+	if len(parts) < 2 {
+		log.Println("not enough argument")
+	}
+	log.Println(parts)
+	key := cleanLine(parts[0])
+	val := parts[1]
+
+	datMap[key] = val // TODO to add lock
+}
+
+func proceedWithGet(data []byte) {
+	log.Println("key", string(data))
+	log.Println("DATA: ", datMap[cleanLine(string(data))])
+}
+
+func cleanLine(line string) string {
+	// Remove leading and trailing whitespaces
+	cleanedLine := strings.TrimSpace(line)
+	// Remove newline characters
+	cleanedLine = strings.ReplaceAll(cleanedLine, "\n", "")
+	// Remove space characters
+	cleanedLine = strings.ReplaceAll(cleanedLine, " ", "")
+
+	return line
 }
