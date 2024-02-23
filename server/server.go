@@ -1,6 +1,7 @@
 package server
 
 import (
+	"encoding/binary"
 	"fmt"
 	"io"
 	"log"
@@ -56,12 +57,57 @@ func handleConnectionV0(conn net.Conn) {
 
 func processData(data []byte, conn net.Conn) {
 	// Process the received data here
-	returnStr := "OK, " + string(data[4:]) //first four bute are tag and value
-	log.Println("Size: ", len([]byte(returnStr)))
-	// conn.Write([]byte(returnStr))
-	log.Println("Return String:", returnStr)
-	_, err := conn.Write([]byte(returnStr))
+	returnStr := "OK, " + string(data[4:]) //first four byte are tag and value
+
+	tlv, err := Decode(data)
 	if err != nil {
 		log.Println("Error writing to connection:", err)
 	}
+	log.Println("Size: ", len([]byte(tlv.Value)))
+	// conn.Write([]byte(returnStr))
+	log.Println("Return String:", returnStr)
+	_, err = conn.Write([]byte(returnStr))
+	if err != nil {
+		log.Println("Error writing to connection:", err)
+	}
+}
+
+type TLV struct {
+	Tag    uint16 //2bit
+	Length uint16 //bit
+	Value  []byte //as per length
+}
+
+func Decode(data []byte) (*TLV, error) {
+	//four bit are reserved for Key, and length
+	if len(data) <= 5 {
+		return nil, fmt.Errorf("insufficient data")
+	}
+	cmd := binary.BigEndian.Uint16(data[:2])
+	length := binary.BigEndian.Uint16(data[2:4])
+
+	if len(data) < int(length)+4 {
+		return nil, fmt.Errorf("insufficient data for TLV value decoding")
+	}
+
+	nData := data[4:length]
+
+	fmt.Println("DATA: ", string(nData), " CMD: ", cmd)
+
+	tlv := TLV{
+		Tag:    cmd,
+		Length: length,
+		Value:  nData,
+	}
+
+	return &tlv, nil
+}
+
+func (t *TLV) Encode() []byte {
+	buf := make([]byte, 4+len(t.Value))
+	binary.BigEndian.PutUint16(buf, t.Tag)
+	binary.BigEndian.PutUint16(buf[2:], t.Length)
+	copy(buf[4:], t.Value)
+	// fmt.Println(buf)
+	return buf
 }
