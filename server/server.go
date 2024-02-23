@@ -11,11 +11,16 @@ import (
 	"github.com/0x4E43/joker/utils"
 )
 
-var datMap map[string]any
+var datMap map[string]string
+
+//RESPONSE CODE
+// 0- SUCCESS
+// 99- ERR
+//END
 
 func init() {
 	log.Println("INIT")
-	datMap = make(map[string]any, 0)
+	datMap = make(map[string]string, 0)
 }
 
 type ServerOption struct {
@@ -74,8 +79,14 @@ func processData(data []byte, conn net.Conn) {
 	log.Println("Size: ", len([]byte(tlv.Value)))
 	// conn.Write([]byte(returnStr))
 	log.Println("Return String:", returnStr)
-	parseCmd(int16(tlv.Tag), tlv.Value)
-	_, err = conn.Write([]byte(returnStr))
+	val, code := parseCmd(int16(tlv.Tag), tlv.Value)
+	tlvResp := TLV{
+		Tag:    uint16(code),
+		Length: uint16(len(val)),
+		Value:  []byte(val),
+	}
+
+	_, err = conn.Write(tlvResp.Encode())
 	if err != nil {
 		log.Println("Error writing to connection:", err)
 	}
@@ -122,45 +133,58 @@ func (t *TLV) Encode() []byte {
 	return buf
 }
 
-func parseCmd(tag int16, data []byte) {
+func parseCmd(tag int16, data []byte) (string, int) {
 	log.Println("DATA MAP: ", datMap)
 	switch tag {
 	case 1:
 		log.Println("PUT method called")
-		proceedWithPut(data)
+		code := proceedWithPut(data)
+		if code != CODE_SUCCESS {
+			log.Println("write Errors")
+			return "write_error", code
+		}
+		return "success", code
 	case 2:
 		log.Println("GET method called")
-		proceedWithGet(data)
+		val, code := proceedWithGet(data)
+		if code != CODE_SUCCESS {
+			log.Println("key Errors")
+			return "key_error", code
+		}
+		return val, code
 	default:
 		log.Panicln("NOT valid method")
 	}
+	return "", 0
 }
 
-func proceedWithPut(data []byte) {
+func proceedWithPut(data []byte) int {
 	log.Println(string(data))
 	parts := strings.Split(string(data), ">")
 	if len(parts) < 2 {
 		log.Println("not enough argument")
 	}
 	log.Println(parts)
-	key := cleanLine(parts[0])
+	key := parts[0]
 	val := parts[1]
 
 	datMap[key] = val // TODO to add lock
+	return CODE_SUCCESS
 }
 
-func proceedWithGet(data []byte) {
+func proceedWithGet(data []byte) (string, int) {
 	log.Println("key", string(data))
-	log.Println("DATA: ", datMap[cleanLine(string(data))])
+	key := datMap[string(data)]
+	log.Println("DATA: ", key)
+	if key == "" {
+		return "", CODE_KEY_ERROR
+	}
+	return key, CODE_SUCCESS
 }
 
-func cleanLine(line string) string {
-	// Remove leading and trailing whitespaces
-	cleanedLine := strings.TrimSpace(line)
-	// Remove newline characters
-	cleanedLine = strings.ReplaceAll(cleanedLine, "\n", "")
-	// Remove space characters
-	cleanedLine = strings.ReplaceAll(cleanedLine, " ", "")
-
-	return line
-}
+const (
+	//CODES
+	CODE_SUCCESS = 0
+	//ERROR CODES
+	CODE_KEY_ERROR = 101
+)
