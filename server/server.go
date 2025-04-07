@@ -36,7 +36,7 @@ func CreateServer(servOption *ServerOption) {
 	//Listen to the port
 	lstnr, err := net.Listen("tcp", ":"+servOption.port)
 	utils.HandleError(err)
-	fmt.Println("Joker laighing at :", lstnr.Addr().String())
+	fmt.Println("Joker laughing at :", lstnr.Addr().String())
 	defer lstnr.Close()
 	for {
 		conn, err := lstnr.Accept()
