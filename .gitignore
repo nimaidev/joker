@@ -19,6 +19,8 @@ _obj
 _test
 _testmain.go
 
+.build/
+
 /VERSION.cache
 /bin/
 /build.out
@@ -34,12 +36,6 @@ _testmain.go
 /src/cmd/dist/dist
 /src/cmd/go/internal/cfg/zdefaultcc.go
 /src/cmd/internal/objabi/zbootstrap.go
-/src/go/build/zcgo.go
-/src/go/doc/headscan
-/src/internal/buildcfg/zbootstrap.go
-/src/runtime/internal/sys/zversion.go
-/src/unicode/maketables
-/src/time/tzdata/zzipdata.go
 /test.out
 /test/garbage/*.out
 /test/pass.out
