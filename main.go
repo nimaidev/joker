@@ -2,13 +2,27 @@ package main
 
 import (
 	"fmt"
-
-	"github.com/0x4E43/joker/server"
+	"net"
 )
 
 func main() {
 	fmt.Println("Hello Joker")
 
-	servOption := server.SetServerOption("6379")
-	server.CreateServer(servOption)
+	// create a connection socket
+	listener, err := net.Listen("tcp", "localhost:9999")
+	if err != nil {
+		fmt.Printf("Failed to connect: %v\n", err)
+		return
+	}
+	defer listener.Close()
+	for {
+		con, err := listener.Accept()
+		if err != nil {
+			fmt.Printf("Error %v \n", err)
+			return
+		}
+		defer con.Close()
+		fmt.Printf("Connection details %s", con.RemoteAddr())
+
+	}
 }
