@@ -25,13 +25,20 @@ func main() {
 		fmt.Printf("Connection details %s \n", con.RemoteAddr())
 		// need to read what client are sending
 		buffer := make([]byte, 1028)
-		n, err := con.Read(buffer)
-		if err != nil {
-			fmt.Printf("Error %v \n", err)
-		}
-		clientBuffer := buffer[:n]
+		for {
+			n, err := con.Read(buffer)
+			if err != nil {
+				fmt.Printf("Error %v \n", err)
+			}
+			clientBuffer := buffer[:n]
+			clientCmd := string(clientBuffer)
+			if clientCmd == "0" {
+				con.Write([]byte("Thank you for using JOKER"))
+				con.Close()
+			}
+			fmt.Printf("Client : %s | Data : %s", con.RemoteAddr(), string(clientBuffer))
+			con.Write([]byte("OK\r\n"))
 
-		fmt.Printf("Client : %s | Data : %s", con.RemoteAddr(), string(clientBuffer))
-		con.Write([]byte("OK\r\n"))
+		}
 	}
 }
