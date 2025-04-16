@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net"
+	"strings"
 )
 
 func main() {
@@ -32,9 +33,12 @@ func main() {
 			}
 			clientBuffer := buffer[:n]
 			clientCmd := string(clientBuffer)
+			// Trim space from clientCmd
+			clientCmd = strings.TrimSpace(clientCmd) //this will remove \n or \r
 			if clientCmd == "0" {
 				con.Write([]byte("Thank you for using JOKER"))
 				con.Close()
+				return
 			}
 			fmt.Printf("Client : %s | Data : %s", con.RemoteAddr(), string(clientBuffer))
 			con.Write([]byte("OK\r\n"))
