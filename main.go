@@ -22,7 +22,6 @@ func main() {
 			fmt.Printf("Error %v \n", err)
 			return
 		}
-		defer con.Close()
 		go handleConnection(con) //To handle connection close
 
 	}
@@ -30,12 +29,14 @@ func main() {
 
 func handleConnection(con net.Conn) {
 	fmt.Printf("Connection details %s \n", con.RemoteAddr())
+	defer con.Close()
 	// need to read what client are sending
 	buffer := make([]byte, 1028)
 	for {
 		n, err := con.Read(buffer)
 		if err != nil {
 			fmt.Printf("Error %v \n", err)
+			return
 		}
 		clientBuffer := buffer[:n]
 		clientCmd := string(clientBuffer)
