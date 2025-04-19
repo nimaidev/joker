@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-func main2() {
+func main() {
 	fmt.Println("Hello Joker")
 
 	// create a connection socket
