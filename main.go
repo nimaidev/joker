@@ -11,7 +11,6 @@ import (
 )
 
 func main() {
-	isGracefulShutdown := make(chan bool)
 	fmt.Println("Hello Joker")
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
@@ -28,16 +27,13 @@ func main() {
 	defer listener.Close()
 
 	go func() {
-		for sig := range stop {
-			<-stop
-			fmt.Println("User Killing the process ", sig)
-			isGracefulShutdown <- true
-			listener.Close()
-		}
+		sig := <-stop
+		fmt.Println("User ", sig)
+		cancel()
 	}()
 	for {
 		select {
-		case <-isGracefulShutdown:
+		case <-ctx.Done():
 			fmt.Println("Killing listener")
 			listener.Close()
 			return
@@ -47,6 +43,7 @@ func main() {
 				select {
 				case <-ctx.Done():
 					fmt.Println("Connection closed")
+					con.Write([]byte("\n Remote connection closed"))
 				default:
 					fmt.Printf("Error %v \n", err)
 				}
@@ -64,12 +61,14 @@ func handleConnection(con net.Conn, ctx context.Context) {
 	// need to read what client are sending
 	buffer := make([]byte, 1028)
 	for {
+
 		select {
 		case <-ctx.Done():
 			fmt.Println("Connection closed by server")
 			return
 		default:
 			n, err := con.Read(buffer)
+
 			if err != nil {
 				fmt.Printf("Error %v \n", err)
 				return
